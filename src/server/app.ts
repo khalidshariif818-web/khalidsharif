@@ -242,7 +242,12 @@ export async function createApp(customContext?: Partial<AppRuntimeContext>): Pro
           repo.getSessionVersion(payload.sub),
         ]);
         const svValid = payload.sv !== undefined ? payload.sv === currentSv : currentSv <= 1;
-        if (profile && profile.accountStatus === 'active' && svValid) {
+        if (
+          profile &&
+          profile.accountStatus === 'active' &&
+          svValid &&
+          (!config.requireEmailVerification || profile.emailVerified)
+        ) {
           user = profile;
         }
       }
@@ -352,6 +357,10 @@ export async function createApp(customContext?: Partial<AppRuntimeContext>): Pro
         text: `Verify your account: ${config.appUrl}/verify-email?token=${verifyToken}`,
       });
 
+      if (config.requireEmailVerification) {
+        return c.json({ verificationRequired: true, emailDelivery: emailResult }, 201);
+      }
+
       const sessionToken = await issueSessionToken(user.id);
       applySessionCookie(c, sessionToken);
 
@@ -389,6 +398,12 @@ export async function createApp(customContext?: Partial<AppRuntimeContext>): Pro
     }
 
     const user = (await repo.getUserProfileById(creds.id))!;
+    if (config.requireEmailVerification && !user.emailVerified) {
+      return c.json(
+        { error: 'Please verify your email using the link we sent before signing in.', code: 'EMAIL_VERIFICATION_REQUIRED' },
+        403
+      );
+    }
     const sessionToken = await issueSessionToken(user.id);
     applySessionCookie(c, sessionToken);
 
@@ -507,13 +522,15 @@ export async function createApp(customContext?: Partial<AppRuntimeContext>): Pro
   });
 
   app.post('/api/auth/resend-verification', async (c) => {
-    const user = requireAuth(c);
-    const limited = await enforceRateLimit(c, `resend-verify:${user.id}`, 5, 60);
+    const limited = await enforceRateLimit(c, `resend-verify:${getClientIp(c)}`, 5, 3600);
     if (limited) return limited;
 
-    if (user.emailVerified) {
-      return c.json({ ok: true, alreadyVerified: true });
-    }
+    const parsed = forgotPasswordSchema.safeParse(await c.req.json().catch(() => ({})));
+    if (!parsed.success) return c.json({ error: 'Valid email is required' }, 400);
+
+    const creds = await repo.findAuthCredentialsByEmail(parsed.data.email);
+    const user = creds ? await repo.getUserProfileById(creds.id) : null;
+    if (!user || user.emailVerified) return c.json({ ok: true });
 
     const verifyToken = signToken({ sub: user.id, typ: 'email_verify' }, config.sessionSecret, 86400);
     const emailDelivery = await emailService.send({
@@ -523,7 +540,7 @@ export async function createApp(customContext?: Partial<AppRuntimeContext>): Pro
       text: `Verify your account: ${config.appUrl}/verify-email?token=${verifyToken}`,
     });
 
-    return c.json({ ok: true, alreadyVerified: false, emailDelivery });
+    return c.json({ ok: true, emailSent: emailDelivery.sent });
   });
 
   app.post('/api/auth/supabase-session', async (c) => {

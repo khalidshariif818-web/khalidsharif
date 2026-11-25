@@ -115,16 +115,30 @@ export const RegisterPage: React.FC = () => {
   const [password, setPassword] = useState('');
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
+  const [verificationPending, setVerificationPending] = useState(false);
+  const [verificationEmailSent, setVerificationEmailSent] = useState(true);
+  const [resendMessage, setResendMessage] = useState<string | null>(null);
+  const [resending, setResending] = useState(false);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError(null);
     setLoading(true);
     try {
-      const res = await apiFetch<{ user: UserProfile; sessionToken?: string }>('/api/auth/register', {
+      const res = await apiFetch<{
+        user?: UserProfile;
+        sessionToken?: string;
+        verificationRequired?: boolean;
+        emailDelivery?: { sent: boolean };
+      }>('/api/auth/register', {
         method: 'POST',
         body: JSON.stringify({ fullName, email, password, preferredLanguage: language }),
       });
+      if (res.verificationRequired) {
+        setVerificationEmailSent(Boolean(res.emailDelivery?.sent));
+        setVerificationPending(true);
+        return;
+      }
       if (res.sessionToken) {
         setAuthToken(res.sessionToken);
       }
@@ -137,6 +151,22 @@ export const RegisterPage: React.FC = () => {
     }
   };
 
+  const resendVerification = async () => {
+    setResending(true);
+    setResendMessage(null);
+    try {
+      await apiFetch('/api/auth/resend-verification', {
+        method: 'POST',
+        body: JSON.stringify({ email }),
+      });
+      setResendMessage('If this account still needs verification, a new link has been sent. Check your inbox and spam folder.');
+    } catch (err) {
+      setResendMessage(err instanceof Error ? err.message : 'Could not resend the verification email. Please try again later.');
+    } finally {
+      setResending(false);
+    }
+  };
+
   return (
     <>
       <SeoHead title={`${t('registerTitle')} – ${t('brandName')}`} description={t('registerTitle')} noIndex />
@@ -145,6 +175,31 @@ export const RegisterPage: React.FC = () => {
           <h1 className="text-2xl sm:text-3xl font-semibold text-[#02598B] dark:text-sky-400">
             {t('registerTitle')}
           </h1>
+          {verificationPending ? (
+            <div className="space-y-4" role="status">
+              <p className="text-sm text-slate-700 dark:text-slate-200">
+                Account-ka waa la sameeyay. Fur email-ka <strong>{email}</strong> oo guji linkiga xaqiijinta si aad u gasho.
+                Ka fiiri Spam/Junk haddii uusan Inbox-ka ku jirin.
+              </p>
+              {!verificationEmailSent && (
+                <p className="text-sm text-amber-700 dark:text-amber-300">
+                  Email-ku hadda ma bixin. Adeegga email-ka ayaan weli si buuxda loo dejin; isku day dib-u-dirista mar dambe.
+                </p>
+              )}
+              {resendMessage && <p className="text-sm text-slate-600 dark:text-slate-300">{resendMessage}</p>}
+              <button
+                type="button"
+                onClick={() => void resendVerification()}
+                disabled={resending}
+                className="w-full min-h-[44px] py-2.5 px-4 text-sm font-medium rounded border border-[#0376B8] text-[#0376B8] dark:text-sky-400 disabled:opacity-50"
+              >
+                {resending ? t('loading') : 'Dib u dir linkiga xaqiijinta'}
+              </button>
+              <p className="text-sm text-center">
+                <Link to="/login" className="text-[#0376B8] dark:text-sky-400 font-medium hover:underline">Ku noqo gelitaanka</Link>
+              </p>
+            </div>
+          ) : <>
           {error && (
             <div role="alert" className="p-3 rounded bg-red-50 dark:bg-red-950/40 border border-red-200 dark:border-red-800 text-sm text-red-700 dark:text-red-300">
               {error}
@@ -208,6 +263,7 @@ export const RegisterPage: React.FC = () => {
               {t('signInBtn')}
             </Link>
           </p>
+          </>}
         </div>
       </div>
     </>
