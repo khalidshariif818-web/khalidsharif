@@ -1,0 +1,6 @@
+{
+  "name": "Khalid Sharif Digital Library",
+  "description": "Multilingual editorial digital library and e-commerce platform offering Somali, English, and Arabic books with protected PDF reading and server-verified commerce.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}

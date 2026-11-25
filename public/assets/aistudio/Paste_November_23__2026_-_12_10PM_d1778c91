@@ -1,0 +1,285 @@
+Worked for 1m 12s
+
+## A. Xaqiijinta source-ka Codex
+
+Waxaan dib u eegay mashruuca ku jira `C:\Users\cxc\Downloads\khalid-sharif-digital-library`. Waa React/Vite frontend, Express API, Supabase Auth/database/storage, iyo Docker deployment. Ma beddelin code ama database.
+
+
+
+Qodobbadan waxaan ka xaqiijiyey source-ka:
+
+- **PDF gaar loo ilaaliyo:** PDFs waxay ku jiraan Supabase bucket gaar ah; server-ku wuxuu sameeyaa signed stream URL waqti-gaaban leh. [server.ts](C:/Users/cxc/Downloads/khalid-sharif-digital-library/server.ts) · [store.ts](C:/Users/cxc/Downloads/khalid-sharif-digital-library/server/store.ts)
+- **Paid access iyo pricing:** Order-ka waxaa lagu xisaabiyaa xogta database-ka; paid books waxay u baahan yihiin entitlement. Hase yeeshee, akhriska PDF-ga ma xaqiijiyo account suspension-ka—waa arrin amni oo u baahan in Codex si gaar ah loo saxo. [customers.ts](C:/Users/cxc/Downloads/khalid-sharif-digital-library/server/customers.ts)
+- **Payment fulfillment:** SQL function ayaa xaqiijisa lacagta iyo currency-ga order-ka, order-ka paid ka dhigta, entitlements-na abuurta. [009_premier_checkout.sql](C:/Users/cxc/Downloads/khalid-sharif-digital-library/supabase/009_premier_checkout.sql)
+- **Book pricing iyo campaigns:** Qiime, currency, discount iyo iib-helitaan buug kasta u gaar ah; ololayaal buug/category/maktabadna way jiraan. [bookPricing.ts](C:/Users/cxc/Downloads/khalid-sharif-digital-library/server/bookPricing.ts) · [AdminPromotionsPage.tsx](C:/Users/cxc/Downloads/khalid-sharif-digital-library/src/pages/AdminPromotionsPage.tsx)
+- **MPGS:** Hosted Checkout adapter, webhook/return verification, secret encryption/masking iyo SSRF URL checks way jiraan. Tijaabo live ah lama xaqiijin. [premierMpgs.ts](C:/Users/cxc/Downloads/khalid-sharif-digital-library/server/premierMpgs.ts) · [premierGatewaySettings.ts](C:/Users/cxc/Downloads/khalid-sharif-digital-library/server/premierGatewaySettings.ts)
+- **Reading/account:** PDF.js reader, gudaha PDF-ga ka raadi, bookmarks, progress, wishlist, history, orders iyo cart ayaa jira. [PdfCanvasReader.tsx](C:/Users/cxc/Downloads/khalid-sharif-digital-library/src/components/PdfCanvasReader.tsx) · [AccountPages.tsx](C:/Users/cxc/Downloads/khalid-sharif-digital-library/src/pages/AccountPages.tsx)
+- **Localization iyo theme:** Somali/English/Arabic, RTL CSS iyo theme browser-ka lagu xafido way jiraan. [i18n.tsx](C:/Users/cxc/Downloads/khalid-sharif-digital-library/src/lib/i18n.tsx) · [useTheme.ts](C:/Users/cxc/Downloads/khalid-sharif-digital-library/src/hooks/useTheme.ts)
+- **Admin:** Book/category management, chunked uploads, customer status/roles/access, reports, contacts iyo activity logs way jiraan.
+- **Reviews/discount codes:** Admin review moderation wuu jiraa, laakiin customer review submission/public reviews ma helin. Discount-code manager wuu jiraa, laakiin checkout-ka code input-kiisu wuu disabled yahay.
+- **Per-user PDF watermark:** Reader-ku watermark muuqaal ah ayuu leeyahay, laakiin **per-user watermark lama xaqiijin**.
+- **Payment event ledger:** Order finalization-ku waa idempotent heer order/entitlement ah, laakiin `payment_events` lama arag iyadoo webhook flow-ga lagu qorayo; taas ha loogu yeerin event ledger buuxa.
+
+`npm test` hore wuxuu soo sheegay **22 passed, 0 failed**. Tijaabooyinkaas badankoodu waa unit tests; ma xaqiijiyaan Supabase-ka fog ama bank sandbox. `adminBootstrap.test.ts` iyo `siteSettings.test.ts` way jiraan, laakiin package test script-ku kuma daro.
+
+## B. Feature gap matrix
+
+**Xaddidaad muhiim ah:** Google AI Studio project-ka ma hayo workspace/source si aan u baaro. Sidaas darteed “Google” column-ku wuxuu ka dhigan yahay oo keliya waxyaabihii inventory-ga aad soo dirtay sheegtay; mana aha xaqiijin madax-bannaan.
+
+| Feature                                        | Codex hadda                                                                                      | Google inventory-ga aad soo dirtay                                             | Talo / mudnaan                                                                                                                                     |
+| ---------------------------------------------- | ------------------------------------------------------------------------------------------------ | ------------------------------------------------------------------------------ | -------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Private PDF + signed URLs                      | La xaqiijiyey; suspension gap ayaa jirta                                                         | Waxaa laga yaabaa inuu jiro; RLS/privacy waa la sheegay inay dhibaato leedahay | **P0:** Google ha hubiyo private storage iyo server authorization; Codex-na suspension-ka ha xiro                                                  |
+| PDF.js reader, text search, bookmarks/progress | La xaqiijiyey: text search, bookmarks iyo progress                                               | Inventory-gu ma caddayn in search-ku jiro                                      | **P2:** Google ha ku daro oo keliya qaybaha dhab ahaan maqan                                                                                       |
+| Per-book pricing iyo purchase toggles          | La xaqiijiyey                                                                                    | Inventory-ga Google ma sheegayo si cad                                         | **P1:** Ku dar haddii Google uu leeyahay global/fixed pricing                                                                                      |
+| Server-side total iyo entitlements             | SQL order creation/finalization way jiraan                                                       | Order inserts iyo amount verification ayaa laga sheegay inay daciif yihiin     | **P0:** Adeegso DB transaction/RPC, ku xaqiiji amount/currency, kuna xir entitlements                                                              |
+| MPGS Hosted Checkout                           | Adapter iyo verification code way jiraan; live lama tijaabin                                     | MPGS waa la sheegay, balse waxaa jira verification/billing gaps                | **P0:** Ha nuqulin MPGS flow-ga aan la xaqiijin; hubi oo dib u samee verification-ka ammaan ahaan                                                  |
+| Encrypted gateway credentials + SSRF checks    | AES-GCM, masking, secret preservation iyo URL checks way jiraan                                  | Lama caddayn inay jiraan                                                       | **P1:** Ku dar haddii maqan; secrets ha ka muuqan browser-ka/RLS public                                                                            |
+| Payment event idempotency                      | Order finalization-ku idempotent buu u muuqdaa; event ledger buuxa lama xaqiijin                 | Waxaa la sheegay inuu daciif yahay                                             | **P0:** Samee event ledger leh unique provider event ID iyo atomic fulfillment                                                                     |
+| Promo codes                                    | Kaydin/admin UI way jiraan; checkout-ku ma adeegsan karo                                         | Waxaa la sheegay inay jiraan oo server-ka lagu xisaabiyo                       | **P1:** Google ha hirgeliyo server validation haddii la xaqiijiyo inuu maqan yahay; Codex codes ma aha feature dhammaystiran                       |
+| Category/library campaigns                     | La xaqiijiyey                                                                                    | Inventory-gu wuxuu sheegaa promo-code management; campaigns lama xaqiijin      | **P2:** Ku dar haddii Google ka maqan yihiin; qiimaha server-ka ha go’aamiyo                                                                       |
+| Somali/English/Arabic + RTL                    | La xaqiijiyey, page kasta ma wada hubin                                                          | Waxaa la sheegay inay buuxaan                                                  | **P2:** Google ha xoojiyo meelaha maqan, hana ilaaliso RTL                                                                                         |
+| Theme persistence                              | localStorage ayuu ku xafidaa                                                                     | Lama xaqiijin                                                                  | **P3:** Ku dar haddii maqan                                                                                                                        |
+| Dynamic contacts/legal/info pages              | Contacts, about, privacy, terms iyo refunds way jiraan                                           | Waxaa la sheegay inay jiraan                                                   | **P3:** Nuqul looma baahna haddii Google source-ku xaqiijiyo                                                                                       |
+| Reviews                                        | Codex admin moderation oo keliya; customer/public flow ma jiro                                   | Customer reviews/public display/moderation ayaa la sheegay                     | **P1:** Google ha hubiyo submission ownership, moderation iyo public-only published reviews                                                        |
+| Notifications/email                            | In-app notifications way jiraan; email delivery ma jiro                                          | In-app/email verification/reset ayaa la sheegay                                | **P2:** Google ha hubiyo email delivery iyo preference controls; Codex email ma dhammaystirna                                                      |
+| Account/profile/auth                           | Supabase signup, reset, profile, orders, library iyo preferences way jiraan                      | Waxaa la sheegay inay jiraan                                                   | **P3:** Kaliya hagaaji meelaha Google dhab ahaan ka maqan yahay                                                                                    |
+| Customer suspension/roles/access               | Admin controls way jiraan; paid reader suspend gap baa ka jirta                                  | Waxaa la sheegay inay jiraan                                                   | **P0:** Role hierarchy iyo suspend check ka xaqiiji labada flow                                                                                    |
+| Admin reports/activity                         | Sales reports iyo audit log way jiraan                                                           | Waxaa la sheegay inay jiraan                                                   | **P3:** Ku dar haddii Google ka maqan yahay                                                                                                        |
+| Manual EVC/Zaad/eDahab/bank transfer           | Kuma jiraan                                                                                      | Waxaa loo soo jeediyey “if relevant”                                           | **Ha ku darin hadda:** Isticmaalka la qorsheeyey waa Premier Bank Visa/Mastercard; manual methods-ku waxay keenayaan hawlgelin/xaqiijin gacanta ah |
+| Related books/structured SEO                   | Dynamic SEO, sitemap iyo structured metadata way jiraan; related-book flow si cad looma xaqiijin | Related titles/SEO ayaa inventory-gu sheegaa                                   | **P2:** Google ha daro related books haddii uu waxtar u leeyahay catalog-ga oo uusan horay u jirin                                                 |
+| Docker/deployment                              | Docker + Node setup documentation way jiraan                                                     | Google Pages/Cloudflare architecture ayaa la sheegay                           | **P1:** Ha isku darin files; la jaanqaad runtime-ka Google ee uu isagu xaqiijiyo                                                                   |
+
+## C. Qaybaha qiimaha leh ee Google loo wareejin karo
+
+Kuwani waa **musharraxiin**, ee ma aha amar lagu koobiyeeyo:
+
+1. Private PDF delivery oo leh token gaaban iyo server-side entitlement checks.
+2. Book kasta qiime iyo currency u gaar ah, server-side order totals iyo verified entitlements.
+3. Secure MPGS Hosted Checkout: exact amount/currency verification iyo webhook idempotency.
+4. Gateway credential encryption/masking iyo admin configuration—haddii Google aanu lahayn mid sugan.
+5. Customer PDF search, saved progress/bookmarks iyo reading history—haddii qaybahan ka maqan yihiin.
+6. Admin per-user book grants, customer controls, sales reports iyo activity logs—haddii Google ka maqan yihiin.
+7. Category/library campaigns iyo public SEO metadata—haddii aan Google source-ku horay u taageerin.
+
+Ha lagu daro oo keliya marka Google AI Studio marka hore caddeeyo feature-ku inuu maqan yahay ama uu daciif yahay.
+
+## D. Isku-dhacyo iyo digniino amni
+
+- **Google source lama helin:** Handoff prompt-ku waa inuu marka hore Google AI Studio ka dalbaa in uu isagu baaro source-kiisa iyo database architecture-kiisa.
+- **Architecture kala duwan:** Codex waa React/Vite + Express + Supabase + Docker; Google inventory-gu wuxuu tilmaamayaa Cloudflare Pages Functions iyo suuragal SQLite/Supabase. Ha koobiyeeyn imports, routes ama SQL migrations si toos ah.
+- **Gateway secrets:** Haddii `site_settings` RLS-ku u oggolaanayo public access, credentials ama discount data ha lagu kaydin halkaas. Secrets gaar ah, service-role-only table ama server secret store isticmaal.
+- **Payment verification:** User/order ownership, provider reference, status, amount, currency iyo webhook signature dhammaantood server-side ha la xaqiijiyo.
+- **Atomicity:** Order, transaction, provider event iyo entitlements hal DB transaction/RPC ku dhammee; ku dar idempotency constraints.
+- **Sessions/tokens:** Samee revocation/expiry dhab ah; ha ku kaydin admin token `localStorage`.
+- **Rate limiting:** Adeegso IP header ka yimaada proxy la aamini karo oo si cad loo dejiyey; ha aaminin `X-Forwarded-For` kasta.
+- **Role hierarchy:** Ordinary admin ma beddeli karo/demin karo super-admin; self-demotion/suspension ha la xannibo.
+- **Cloudflare runtime:** Secrets iyo Supabase bindings ku akhri habka Cloudflare runtime-ka rasmiga ah; tijaabi routes-ka production entrypoint-kaas.
+- **Codex dhinaciisa:** Paid reader stream-ka Codex wuxuu u baahan yahay in lagu daro hubinta suspension-ka ka hor stream access. Tani ma aha feature Google laga soo qaadanayo.
+
+## E. FINAL GOOGLE AI STUDIO IMPLEMENTATION PROMPT
+```
+# CROSS-PLATFORM FEATURE GAP IMPLEMENTATION — KHALID SHARIF DIGITAL LIBRARY
+
+Act as a Principal Software Architect, Senior Full-Stack Engineer, Security Engineer, and Digital Library Product Engineer.
+
+You are working in the Google AI Studio project workspace for Khalid Sharif Digital Library. Improve the existing project. Do not rebuild it.
+
+## Objective
+
+Inspect your actual workspace and compare it against the verified feature candidates below. Implement only features that are genuinely missing or incomplete in your source.
+
+Preserve every existing working feature and all existing data. Do not copy source files, imports, framework assumptions, or SQL directly from another project. Adapt useful behaviors to the architecture you discover in this workspace.
+
+The comparison report supplied with this task describes Codex as React/Vite + Express + Supabase and describes your project as potentially using Cloudflare Pages Functions and/or SQLite/Supabase. These are unverified architectural notes, not permission to assume either design. Inspect the actual code, runtime bindings, database and deployment configuration first.
+
+## Phase 0 — Inspect before editing
+
+Before changing files:
+
+1. Identify the actual project root, framework, build system, backend/runtime, database, authentication, storage and deployment target.
+2. Inspect the real pages/components, API routes, migrations/schema, authorization policies, environment configuration, tests and deployment files.
+3. Trace each relevant flow through:
+   frontend → API → authentication/authorization → database/storage → response/UI.
+4. For every candidate below, classify it as:
+   - already implemented correctly;
+   - partially implemented;
+   - missing;
+   - unsuitable for this product or architecture;
+   - unsafe in its current implementation.
+5. Do not implement a feature merely because it appears in a checklist or has a visible button.
+6. Record the findings in a short implementation plan, then proceed with the verified, valuable work below. Do not stop after producing an audit.
+
+## Product context
+
+This is a digital library with public book discovery, free and paid books, customer accounts, PDF reading, a customer library, administrator book/customer management, discounts and reporting.
+
+The planned online card provider is Premier Bank / Mastercard Payment Gateway Services (MPGS), using Visa/Mastercard Hosted Checkout once the merchant is approved. Do not add Stripe or other payment vendors. Do not add manual EVC Plus, Zaad, eDahab, or bank-transfer workflows unless the product owner explicitly confirms those operations are required.
+
+## Priority 0 — Security and payment correctness blockers
+
+Fix these before introducing any new commerce features.
+
+### A. Protect site settings and gateway secrets
+
+- Inspect all RLS policies and grants for `site_settings`, payment settings, gateway credentials, discount codes and webhook configuration.
+- Public users may read only an explicit allowlist of public settings. Never expose gateway credentials, encrypted secret rows, internal discount rules or admin configuration through public settings APIs or direct Supabase REST.
+- Store gateway secrets in a server-only secret store or a table accessible only to the trusted server/service role.
+- Do not return plaintext secrets. Admin GET responses may return only `hasSecret` flags and masked suffixes.
+- Blank secret inputs during update must preserve the saved secret; provide an authenticated clear action.
+- Keep secrets out of client bundles, logs, analytics, errors, and public runtime bindings.
+- Add migration tests/checks that prove anonymous and customer roles cannot select or modify secret configuration.
+
+### B. Enforce paid-book entitlement and suspension at every read path
+
+- Identify every route that creates signed URLs, streams files, generates previews, or exposes a PDF URL.
+- Keep paid PDFs private. Check verified entitlement on the server immediately before issuing or serving access.
+- Also check that the customer account is active. A suspended/disabled account must not keep access to previously purchased PDFs through an alternate stream route.
+- Free books may follow the intended public access policy.
+- Do not rely on hidden UI buttons or client-only route guards for authorization.
+- Add route-level tests for free access, paid access without entitlement, paid access with entitlement, suspended customer, unpublished book, archived book and unavailable book.
+
+### C. Make orders, payments, and entitlements consistent and idempotent
+
+- Recalculate item prices, applicable discounts, currency and total from trusted database records on the server. Ignore totals submitted by the browser.
+- Validate country, payment-method availability and supported currency before creating an order, so invalid requests do not leave orphan pending orders.
+- Use a database transaction or secure RPC for order/payment state changes.
+- Before marking an order paid, verify provider identity, merchant/order reference, customer ownership, captured/authorized status as required by the bank contract, exact captured amount, exact currency, and association with the expected transaction.
+- Handle duplicate, delayed, replayed and out-of-order webhook events idempotently. Persist provider event identifiers under a uniqueness constraint. Payment event persistence and entitlement creation must be atomic.
+- Only a bank-verified successful payment can create an entitlement.
+- Failed, declined, cancelled, pending or mismatched payments must leave the book locked.
+- Return safe errors to customers; do not expose provider credentials or internal responses.
+
+### D. Secure MPGS Hosted Checkout and customer billing data
+
+- Inspect the actual MPGS contract and the existing implementation before changing it.
+- If MPGS Hosted Checkout is supported, create the session server-side using the server-calculated order. The customer should enter card data only on the official bank-hosted page.
+- Pass validated billing email and receipt phone from the checkout UI to the authenticated server endpoint, store only what is operationally necessary, and apply a retention policy.
+- Never collect or store card number, CVV, PIN, or magnetic-stripe data in this application.
+- Verify MPGS return data using the bank-supported method and/or server-to-server order lookup. Use constant-time comparison for secrets/signatures.
+- Verify webhook signatures over the raw request body, reject replay/duplicate events safely, and confirm the bank contract before assuming header names or payload fields.
+- Never label a connectivity probe as a successful payment test.
+
+### E. Secure sessions, roles, and rate limits
+
+- Use secure, HttpOnly, SameSite cookies for browser sessions; do not put long-lived admin/session tokens in localStorage.
+- Implement session expiration and revocation appropriate to the existing auth provider.
+- Enforce role checks server-side on every admin route.
+- Only a super-administrator may grant/revoke administrator privileges.
+- Ordinary administrators must not modify, suspend or demote a super-administrator. Prevent self-suspension and self-demotion.
+- Rate-limit login, password reset, admin bootstrap, checkout initiation, webhook failure responses, upload issuance, and other sensitive endpoints.
+- Trust forwarded IP headers only when the deployment proxy is explicitly configured and the request came through that trusted proxy. Never trust spoofable forwarded headers by default.
+- Add tests for role hierarchy, unauthorized route calls, suspension and rate limiting.
+
+### F. Cloudflare/runtime safety, if Cloudflare is the actual deployment target
+
+- Use the runtime's official environment/bindings object; never assume Node `process.env` exists in an Edge/Pages Function.
+- Confirm that each API path is routed through the intended production entrypoint and that runtime secrets are unavailable to browser code.
+- Add deployment-specific tests or smoke checks for auth, admin, storage, checkout and webhooks.
+- If the actual deployment is Node/Express instead, follow that architecture and do not add Cloudflare-specific code.
+
+## Priority 1 — Feature candidates to add only if the source audit proves they are missing
+
+### A. Book-level pricing and promotions
+
+- Support an independent price, currency, free/paid status, optional discount price and purchase availability per book.
+- Keep public book details, cart, checkout, receipts and customer purchase history consistent with the trusted server price.
+- If promotions exist, support the project’s intended campaign types without stacking unintended discounts.
+- Implement promo codes only if they are part of the existing product requirements. Validate code, date, usage limits, eligibility, currency and discount amount on the server; never calculate the authoritative total only in the browser.
+- Add migration/backfill strategies that preserve existing book prices and allow a safe free default for legacy records.
+
+### B. Secure reading and account library
+
+- Reuse or implement account library, verified purchases, free-book access, reading history, bookmarks and cross-device progress only where missing.
+- Add PDF text search and mobile-friendly controls if absent.
+- A visual watermark is not a security boundary. If adding per-customer watermarking, do not claim it prevents copying; avoid changing original PDFs or exposing personal data to other users.
+- Do not expose storage object keys, signed storage URLs, or private PDF metadata in public APIs unless required and time-limited.
+
+### C. Reviews, ratings, and moderation
+
+- If absent, implement a complete review lifecycle: authenticated customer submission, server-side validation, pending moderation, public display of published reviews only, admin publish/hide/delete.
+- Decide and enforce whether a review requires a verified purchase.
+- Avoid exposing customer email or private profile data in public review responses.
+- Prevent duplicate/spam submissions using rate limits and appropriate unique constraints.
+- Add tests for submission authorization, invalid ratings, moderation and public filtering.
+
+### D. Admin/customer operations
+
+- If missing, add customer status management, safe role controls, per-book grant/revoke, orders, reports and activity audit logs.
+- Use pagination and bounded date/query ranges for customer, order, book and report lists.
+- Record admin actor, action, resource and timestamp. Never log passwords, card data, gateway secrets or unnecessary personal data.
+- Use server-side authorization and validation for every mutation.
+
+### E. Contact, notifications, localization, theme, and SEO
+
+- Add dynamic admin-managed public contact channels only if absent.
+- Keep public contact data separate from private site settings.
+- Implement in-app notifications and email delivery only if the project already has a configured email provider; do not invent provider credentials.
+- If notification preferences are shown, make them correspond to actual delivery behavior.
+- Preserve Somali/English/Arabic translations and correct `dir=rtl` behavior. Check Arabic layout and form labels rather than only translating strings.
+- Preserve persistent theme preference if present.
+- Add structured book metadata, sitemap and legal/information pages only if missing. Keep canonical URLs and image metadata safe and environment-appropriate.
+
+## Implementation rules
+
+- Preserve existing project architecture, naming, style and functional UI.
+- Do not rebuild the site or replace whole pages unless the feature cannot be safely added otherwise.
+- Do not duplicate tables, routes, components, settings or migration logic.
+- Search for existing equivalents before creating anything.
+- Prefer small, backward-compatible changes and additive migrations.
+- Never drop customer, book, payment, entitlement, or settings data.
+- Keep Supabase service-role credentials server-side.
+- Validate all user input on the server with the project’s existing validation approach.
+- Use transactions/RPCs for critical multi-record operations.
+- Do not add paid services, new payment vendors, or unnecessary paid dependencies.
+- Do not add real merchant credentials or use real card details.
+- Do not claim a feature works unless its executable tests and build support that claim.
+
+## Required tests and verification
+
+For every changed feature, add automated tests using the project’s existing test framework. At minimum, test applicable cases for:
+
+- Anonymous/customer/admin/super-admin authorization.
+- Suspended user access to a paid PDF.
+- Server-calculated book prices and campaign/code validation.
+- Atomic order/payment/entitlement creation and rollback.
+- Exact amount/currency mismatch rejection.
+- Duplicate/replayed payment events.
+- Invalid webhook signature and valid signature.
+- Secret masking, encryption, blank-secret preservation and RLS restrictions.
+- Review submission/moderation/public filtering, if implemented.
+- Admin self-protection and role hierarchy.
+- Cloudflare binding/routing behavior if Cloudflare is the verified target.
+- Mobile/error/loading/empty state behavior where practical.
+
+Then run the actual project commands for type checking, tests and production build. If a command is unavailable or fails for an environment reason, report the exact command and error; do not claim it passed.
+
+## Acceptance criteria
+
+The work is complete only when:
+
+1. The source audit identified which requested features existed before edits.
+2. Security blockers above are resolved or explicitly reported with the exact external dependency preventing resolution.
+3. Paid books cannot be read without a valid entitlement; suspended users cannot use alternate reader/stream paths.
+4. Payment success requires a server-verified exact amount/currency and cannot be applied twice.
+5. Public database/API access cannot reveal payment secrets or private settings.
+6. Any new feature is implemented end-to-end across UI, API, database, authorization, validation and error states.
+7. Existing books, users, prices, settings and working features remain intact.
+8. Added tests, type checks, full test suite and production build pass.
+9. No new payment method, credential, or production integration is falsely represented as active.
+
+## Final response format
+
+Report:
+
+1. Initial workspace architecture and feature audit.
+2. Features already present and intentionally left unchanged.
+3. Features changed, with exact file paths and migrations.
+4. API/UI/database/auth changes.
+5. Security fixes and unresolved external requirements.
+6. Tests run and exact pass/fail counts.
+7. Build/type-check results.
+8. Known limitations and deployment instructions.
+``)
+```
+
+codex kan ayuu isoo siiyay

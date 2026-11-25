@@ -1,0 +1,1061 @@
+# MASTER BUILD PROMPT — KHALID SHARIF DIGITAL LIBRARY
+## Complete Digital Library & E-Commerce Platform — Production-Ready Build
+
+You are acting as a **Senior Software Architect, Senior Full-Stack Developer, UI/UX Designer, Database Engineer, Security Engineer, and QA Engineer**.
+
+Your task is to design and build a completely new website from scratch:
+
+**PROJECT NAME: KHALID SHARIF DIGITAL LIBRARY**
+
+This is a professional digital library and digital bookstore where customers can discover books, read free books, purchase paid books, make payments, and access their purchased books through personal accounts.
+
+This is a real commercial product, not a static website, visual prototype, or frontend-only demo.
+
+---
+
+# PART 1 — CORE DEVELOPMENT RULES
+
+1. Build a new, clean, professional project. Do not copy the old implementation blindly.
+2. Do not carry over insecure or demo-only functionality from the previous website.
+3. Build the entire product: frontend, backend, database, authentication, admin dashboard, reader, commerce, and security.
+4. Do not use localStorage as the authoritative database for users, orders, payments, purchases, pricing, or admin settings.
+5. All important business operations must be performed and verified on the server.
+6. Never fake a successful payment, purchase, authentication, or book unlock.
+7. Never expose private API keys, service-role keys, payment secrets, or privileged credentials in frontend code.
+8. Use clean architecture, reusable components, typed interfaces, validation, and maintainable code.
+9. Do not leave important features as buttons that do nothing.
+10. Do not claim that a feature is complete until it has actually been implemented and tested.
+11. Do not sacrifice security to make a feature appear functional.
+12. Do not stop after generating a roadmap or a design. Build the actual working application.
+
+Before implementation, inspect the working directory and available development environment. If a project already exists in the target directory, inspect it before changing anything. Do not overwrite unrelated user files.
+
+---
+
+# PART 2 — TECHNOLOGY STACK
+
+Use the following stack unless a genuine technical limitation requires a documented alternative.
+
+### Frontend
+- React 19
+- TypeScript
+- Vite
+- Tailwind CSS
+- React Router
+- Reusable component architecture
+- Responsive design
+- Accessible UI components
+
+### Backend and Database
+- Supabase PostgreSQL
+- Supabase Authentication
+- Supabase Storage
+- Server-side API using Cloudflare Pages Functions as the primary production API.
+- Use one authoritative API implementation. Do not create two competing Express and Cloudflare APIs.
+- Typed service and repository layers.
+
+### Document Reader
+- PDF.js for browser-based PDF reading.
+- PDF-lib where appropriate for PDF processing and watermark preparation.
+
+### Engineering
+- Environment-based configuration.
+- Database migrations.
+- Type-safe validation.
+- Automated tests.
+- Production build verification.
+- Error logging and monitoring integration points.
+
+Use stable, maintained package versions compatible with the chosen architecture.
+
+---
+
+# PART 3 — DESIGN DIRECTION
+
+Create an original, premium, professional digital library experience.
+
+The website must feel like a high-quality international digital bookstore.
+
+### Visual direction
+- Modern and elegant.
+- Editorial digital-bookstore aesthetic.
+- Clean typography and strong visual hierarchy.
+- Beautiful book-cover presentation.
+- Carefully designed spacing and layouts.
+- Professional navigation.
+- Smooth, restrained animations.
+- Clear and intuitive interactions.
+- Consistent design system.
+
+Do not create a generic dashboard template or an ordinary ecommerce theme.
+
+### Themes
+Implement both:
+- Light mode.
+- Dark mode.
+
+The theme must work consistently across every route, including the reader, checkout, customer account, and admin dashboard.
+
+### Responsive design
+Support:
+- Desktop.
+- Laptop.
+- Tablet.
+- Mobile.
+
+Do not simply shrink the desktop design. Design a proper mobile experience.
+
+### Accessibility
+- Keyboard navigation.
+- Visible focus states.
+- Accessible forms.
+- Appropriate color contrast.
+- Screen-reader-friendly labels.
+- Reduced-motion support.
+
+---
+
+# PART 4 — MULTILINGUAL SUPPORT
+
+Implement three complete interface languages:
+
+1. Somali.
+2. English.
+3. Arabic.
+
+Requirements:
+- A language selector.
+- Proper translation files.
+- No untranslated interface labels.
+- Correct date, number, and currency formatting.
+- Arabic right-to-left layout.
+- Correct layout direction when switching between languages.
+- Language preference saved to the user's account or a suitable local preference.
+- All customer-facing and admin-facing interface text must be translatable.
+
+Do not translate book titles or author names automatically unless an authorized translated title is provided.
+
+---
+
+# PART 5 — PUBLIC WEBSITE
+
+Build the complete public-facing website.
+
+## 5.1 Homepage
+
+Create a polished homepage containing:
+
+- Professional navigation.
+- Brand identity and logo area.
+- Hero section introducing Khalid Sharif Digital Library.
+- Prominent book discovery/search.
+- Featured books.
+- Latest additions.
+- Popular books.
+- Recommended books.
+- Categories.
+- Free books section.
+- Paid books section.
+- Editorial or promotional sections.
+- Clear calls to action.
+- Professional footer.
+
+All book collections must load from the database.
+
+Admin should be able to manage featured books and homepage sections without editing source code.
+
+## 5.2 Book Catalog
+
+Create a complete catalog page.
+
+Features:
+- Display all published books.
+- Search by title.
+- Search by author.
+- Search by category.
+- Search by relevant metadata.
+- Filter by category.
+- Filter free and paid books.
+- Sort by newest.
+- Sort by popularity.
+- Sort by price.
+- Sort alphabetically.
+- Pagination or efficient incremental loading.
+- Loading states.
+- Empty states.
+- Error states.
+
+Search and filtering must use actual database data.
+
+## 5.3 Categories
+
+Build category browsing.
+
+Each category should have:
+- Name.
+- Description.
+- Image or visual identity where applicable.
+- Slug.
+- Published books.
+- SEO metadata.
+
+Admin must be able to create, edit, publish, reorder, and delete categories safely.
+
+## 5.4 Book Details Page
+
+Every book must have its own details page.
+
+Display:
+- Book cover.
+- Book title.
+- Author.
+- Description.
+- Category.
+- Publication information when available.
+- Language.
+- Page count when available.
+- File format.
+- Price.
+- Free or paid status.
+- Related books.
+- Reviews and ratings if enabled.
+- Availability status.
+
+Actions:
+- Read Free Book.
+- Buy Now.
+- Add to Wishlist.
+- Add to Cart.
+- Continue Reading if already accessible.
+
+The actions must respond to the user's actual authentication and purchase status.
+
+Do not show Buy Now for a free book as if it requires payment.
+
+Do not show a paid book as freely readable.
+
+---
+
+# PART 6 — CUSTOMER AUTHENTICATION
+
+Implement real customer authentication using Supabase Auth.
+
+Pages:
+- Register.
+- Login.
+- Forgot Password.
+- Reset Password.
+- Email verification.
+- Account session handling.
+
+Requirements:
+- Server-side validation for protected operations.
+- Secure session handling.
+- Clear validation messages.
+- Password reset flow.
+- Proper logout.
+- Protected account routes.
+- No fake local-only customer authentication.
+
+Create customer profiles associated with authenticated Supabase users.
+
+Never trust a user ID supplied by the browser as proof of identity. Derive identity from the verified session.
+
+---
+
+# PART 7 — CUSTOMER ACCOUNT
+
+Build a complete customer dashboard.
+
+## 7.1 My Library
+Display books the customer can legitimately access.
+
+Features:
+- Purchased books.
+- Free books added to the library, where applicable.
+- Book cover.
+- Title.
+- Author.
+- Purchase/access status.
+- Read button.
+- Continue Reading.
+- Reading progress.
+
+Only books the user is authorized to access should appear as accessible books.
+
+## 7.2 Reading History
+Display:
+- Recently opened books.
+- Last reading date.
+- Reading progress.
+- Continue Reading action.
+
+## 7.3 Wishlist
+Customers can:
+- Add books.
+- Remove books.
+- View saved books.
+- Open book details.
+- Move to purchase.
+
+Wishlist must persist in the database for authenticated customers.
+
+## 7.4 Purchases
+Display:
+- Purchased books.
+- Order reference.
+- Purchase date.
+- Amount.
+- Payment status.
+- Transaction reference where applicable.
+- Book access status.
+
+A purchase must only appear as completed after trusted payment verification.
+
+## 7.5 Notifications
+Implement an in-app notification center.
+
+Support notifications for:
+- Successful verified purchases.
+- Payment updates.
+- New books.
+- Important account updates.
+
+## 7.6 Account Settings
+Customers can manage:
+- Name.
+- Profile information.
+- Preferred language.
+- Theme preference.
+- Password through secure authentication flows.
+- Notification preferences.
+
+Never expose sensitive account information to other customers.
+
+---
+
+# PART 8 — DIGITAL PDF READER
+
+Build a professional PDF reader.
+
+The reader is a central feature of this platform.
+
+### Reader features
+- Display PDF documents using PDF.js.
+- Page navigation.
+- Previous and next page.
+- Page number indicator.
+- Zoom in and out.
+- Fit-to-width.
+- Fit-to-page.
+- Fullscreen mode.
+- Search inside the document where supported.
+- Reading progress.
+- Continue from last position.
+- Bookmarks.
+- Reading history.
+- Responsive mobile reading.
+- Loading and document error states.
+
+### Access rules
+
+Free books:
+- Can be read according to their published access settings.
+
+Paid books:
+- Can only be read by customers with a valid, verified entitlement.
+
+The frontend must never be the authority deciding whether a paid book can be opened.
+
+### PDF security
+
+- Keep original PDF files in a private Supabase Storage bucket.
+- Never expose permanent public URLs for paid PDFs.
+- Verify the authenticated customer on the server.
+- Verify book availability and entitlement before issuing access.
+- Use short-lived signed access URLs or protected streaming.
+- Revoke or expire access according to the security design.
+- Prevent direct unauthenticated access to paid files.
+- Apply user-specific watermarking where technically appropriate and configurable.
+- Do not claim that browser-based PDF access can prevent every screenshot or copy.
+
+Do not unlock paid books based on a browser-side payment flag.
+
+---
+
+# PART 9 — CART AND COMMERCE
+
+Build a complete digital-book commerce system.
+
+## 9.1 Shopping Cart
+
+Customers can:
+- Add paid books to cart.
+- Remove books.
+- View selected books.
+- View prices.
+- View subtotal.
+- Continue shopping.
+- Proceed to checkout.
+
+Prevent duplicate cart entries for the same book where appropriate.
+
+Validate current book availability and price on the server during checkout.
+
+Do not trust prices submitted by the browser.
+
+## 9.2 Buy Now
+
+The Buy Now flow must be:
+
+Book Details → Checkout → Payment Method → Payment Processing → Verified Result → My Library
+
+The selected book ID must be passed correctly.
+
+The server must retrieve the current authoritative price and book status.
+
+## 9.3 Checkout
+
+Display:
+- Book information.
+- Cover.
+- Title.
+- Price.
+- Order summary.
+- Applicable fees or discounts if configured.
+- Total.
+- Payment method selection.
+- Terms and relevant purchase information.
+
+Requirements:
+- Clear validation.
+- No missing product information.
+- No unexpected price changes.
+- Prevent purchasing unpublished or unavailable books.
+- Prevent unauthorized changes to order totals.
+
+## 9.4 Orders
+
+Implement real database-backed orders.
+
+Order statuses should be explicitly defined, such as:
+- Pending.
+- Awaiting Payment.
+- Processing.
+- Paid.
+- Failed.
+- Cancelled.
+- Refunded.
+
+Use appropriate state transitions and prevent invalid transitions.
+
+---
+
+# PART 10 — REAL PAYMENT ARCHITECTURE
+
+Payment is a critical commercial feature.
+
+Do not implement a fake gateway.
+
+Build a provider-independent payment architecture that can support the payment providers selected by the business.
+
+### Requirements
+
+- Payment provider adapter interface.
+- Secure server-side payment initiation.
+- Unique order reference.
+- Unique transaction reference.
+- Payment status tracking.
+- Provider response validation.
+- Trusted webhook endpoint.
+- Webhook signature verification.
+- Idempotent webhook processing.
+- Duplicate callback protection.
+- Payment reconciliation support.
+- Failed payment handling.
+- Cancelled payment handling.
+- Refund record support.
+- Transaction history.
+
+### Critical payment rule
+
+A payment is successful ONLY when the backend has verified it through a trusted provider response or verified webhook.
+
+Never:
+- Mark a payment successful because the customer returns to a success URL.
+- Trust a browser-submitted transaction status.
+- Unlock a book before verified payment.
+- Expose provider secret keys in the frontend.
+- Create a fake transaction to make the checkout look functional.
+
+### Provider configuration
+
+Create an architecture allowing authorized administrators to configure supported payment methods.
+
+Do not invent provider names, credentials, endpoints, or integration status.
+
+If real provider credentials and official integration documentation are not available, implement the secure adapter interface and configuration structure, mark that provider as not connected, and report exactly what is required to complete the integration.
+
+Do not pretend a real payment provider is operational when it is not.
+
+### Manual payment methods
+
+If manual payment methods are enabled by the administrator, support:
+- Payment instructions.
+- Customer-submitted transaction reference.
+- Pending verification.
+- Admin verification or rejection.
+- Audit trail.
+
+Manual payment must not automatically become verified just because a customer submits a reference.
+
+---
+
+# PART 11 — ADMIN DASHBOARD
+
+Build a complete, professional administration system.
+
+Admin routes must be protected by real server-side authorization.
+
+## 11.1 Dashboard Overview
+
+Display meaningful business metrics:
+- Total books.
+- Published books.
+- Draft books.
+- Registered customers.
+- Total orders.
+- Paid orders.
+- Pending payments.
+- Failed payments.
+- Revenue from verified payments.
+- Recent orders.
+- Recent activity.
+
+Metrics must come from real database queries.
+
+## 11.2 Book Management
+
+Admin can:
+- Create books.
+- Edit books.
+- Delete or archive books.
+- Upload book covers.
+- Upload PDF files.
+- Set book title.
+- Set author.
+- Add descriptions.
+- Assign categories.
+- Set language.
+- Set free or paid status.
+- Set price.
+- Publish or unpublish.
+- Feature books.
+- Set metadata.
+- Preview book information.
+
+Validate all uploads.
+
+Do not permit untrusted file types or unrestricted uploads.
+
+Store private PDFs separately from public book covers.
+
+## 11.3 Category Management
+
+Admin can:
+- Create categories.
+- Edit categories.
+- Delete categories safely.
+- Set category descriptions.
+- Manage category images.
+- Reorder categories.
+- Publish and unpublish categories.
+
+Protect relationships with existing books.
+
+## 11.4 Pricing and Commerce Management
+
+Admin can:
+- Set book prices.
+- Change book availability.
+- Configure supported discounts where implemented.
+- Review orders.
+- Inspect order details.
+- Review payment statuses.
+- View transaction references.
+- Process supported administrative actions.
+- Review refunds.
+
+All settings must be saved in the database, not browser localStorage.
+
+## 11.5 Customer Management
+
+Admin can:
+- View customer accounts.
+- Search customers.
+- View relevant purchase history.
+- View account status.
+- Review customer activity where appropriate.
+
+Do not expose customer passwords, authentication secrets, or sensitive provider information.
+
+## 11.6 Payment Settings
+
+Build a secure payment settings interface.
+
+Admin can:
+- View available payment methods.
+- Enable or disable configured methods.
+- View connection status.
+- Configure non-secret public settings.
+- Manage provider credentials through secure server-side secret configuration, not browser-readable storage.
+- Review payment activity.
+
+Never display stored secret credentials in plaintext.
+
+## 11.7 Reports
+
+Provide reports based on verified database records:
+- Sales.
+- Revenue.
+- Orders.
+- Payments.
+- Popular books.
+- Customer activity.
+- Date-range filtering.
+- Export where appropriate.
+
+Do not count pending or failed payments as revenue.
+
+## 11.8 Admin Security and Activity Logs
+
+Implement:
+- Admin role verification.
+- Protected admin API routes.
+- Admin activity logs.
+- Important action history.
+- Secure role management.
+- Separation between normal customers and administrators.
+
+A normal authenticated user must never automatically become an admin.
+
+---
+
+# PART 12 — DATABASE ARCHITECTURE
+
+Design a normalized, scalable PostgreSQL schema.
+
+Include appropriate tables for:
+
+- profiles
+- user_roles
+- books
+- categories
+- book_categories where needed
+- book_files or secure file metadata
+- wishlists
+- wishlist_items
+- carts
+- cart_items
+- orders
+- order_items
+- payments
+- payment_events
+- payment_provider_configs or safe non-secret configuration metadata
+- purchases
+- entitlements
+- reading_progress
+- bookmarks
+- reading_history
+- notifications
+- reviews where enabled
+- admin_activity_logs
+- site_settings
+- homepage_sections where appropriate
+
+Use:
+- Primary keys.
+- Foreign keys.
+- Unique constraints.
+- Appropriate indexes.
+- Timestamps.
+- Data integrity rules.
+- Database migrations.
+- Safe transactional operations.
+
+Do not create unnecessary duplicate sources of truth.
+
+### Important business relationships
+
+- One customer can have many orders.
+- One order can contain one or more books.
+- One order can have payment attempts or payment events.
+- A verified successful purchase creates or activates the appropriate entitlement.
+- An entitlement determines whether a customer can access a paid book.
+- Reading progress belongs to the correct customer and book.
+- Wishlist items belong to the correct customer.
+
+Use database transactions or carefully designed server-side atomic operations for critical purchase and entitlement changes.
+
+---
+
+# PART 13 — DATABASE SECURITY AND RLS
+
+Enable and properly configure Supabase Row Level Security.
+
+Policies must enforce real ownership and authorization.
+
+Examples:
+- Customers can read and update only their own permitted profile information.
+- Customers can read their own orders.
+- Customers can read their own purchases and entitlements.
+- Customers can manage their own wishlist.
+- Customers can manage their own reading progress and bookmarks.
+- Public users can only read published public book metadata.
+- Public users cannot access private PDF files.
+- Only authorized administrators can manage books, categories, pricing, and settings.
+- Only trusted server-side operations can create verified payment records and entitlements.
+
+Do not use `auth.role() = 'authenticated'` as proof that someone is an administrator.
+
+Use a secure, server-verifiable role strategy.
+
+Test the policies with:
+- Anonymous user.
+- Normal customer.
+- Different customer.
+- Administrator.
+
+Never expose the Supabase service-role key to the browser.
+
+---
+
+# PART 14 — SECURITY REQUIREMENTS
+
+Treat security as a core feature, not a final cosmetic task.
+
+Implement and verify:
+
+- Secure authentication.
+- Server-side authorization.
+- Input validation.
+- Output encoding.
+- Protection against SQL injection through safe query practices.
+- XSS protection.
+- CSRF protection where relevant.
+- Rate limiting for sensitive endpoints.
+- Login abuse protection.
+- Secure file upload validation.
+- Private storage access.
+- PDF entitlement verification.
+- Payment webhook signature verification.
+- Idempotent payment processing.
+- Safe environment variable handling.
+- Secure production cookies and sessions where applicable.
+- No secrets committed to source control.
+- No privileged secrets in client bundles.
+- Error handling that does not reveal internal secrets.
+- Admin action audit logs.
+- Appropriate security headers.
+
+Use least-privilege access throughout the application.
+
+Do not promise absolute PDF copy protection. Implement realistic server-side authorization and file access controls.
+
+---
+
+# PART 15 — NOTIFICATIONS AND EMAIL
+
+Create a notification architecture for:
+- Registration verification.
+- Password reset.
+- Purchase confirmation after verified payment.
+- Payment pending.
+- Payment failure.
+- Refund updates.
+- Important account notifications.
+
+Use a real email service only when configured with valid credentials.
+
+If no email provider is configured, implement the integration interface and clearly report the remaining configuration.
+
+Do not display a message claiming an email was sent if the email service did not send it.
+
+---
+
+# PART 16 — SEO AND PERFORMANCE
+
+Implement:
+- Page titles.
+- Meta descriptions.
+- Canonical URLs where appropriate.
+- Open Graph metadata.
+- Sitemap.
+- Robots configuration.
+- Structured data where appropriate.
+- Optimized images.
+- Lazy loading.
+- Code splitting.
+- Efficient database queries.
+- Pagination.
+- Caching where safe.
+- Error boundaries.
+- Fast initial page rendering.
+
+Private customer pages, checkout pages, admin pages, and private reader content must not be indexed.
+
+Do not cache private user data in shared public caches.
+
+---
+
+# PART 17 — TESTING AND QUALITY ASSURANCE
+
+Create a real testing strategy.
+
+### Unit tests
+Test:
+- Price calculations.
+- Order state transitions.
+- Payment status handling.
+- Entitlement rules.
+- Input validation.
+- Authorization helpers.
+
+### Integration tests
+Test:
+- Authentication.
+- Book APIs.
+- Admin APIs.
+- Checkout.
+- Order creation.
+- Payment initiation.
+- Webhook verification.
+- Entitlement creation.
+- PDF access authorization.
+
+### End-to-end tests
+Test complete user journeys:
+
+1. Visitor opens homepage.
+2. Visitor searches for a book.
+3. Visitor opens book details.
+4. Visitor registers.
+5. Customer opens a free book.
+6. Customer adds a paid book to wishlist.
+7. Customer adds a paid book to cart.
+8. Customer proceeds to checkout.
+9. Customer initiates payment.
+10. Verified payment creates the correct purchase entitlement.
+11. Customer opens the purchased book.
+12. Customer continues reading from saved progress.
+13. Admin adds a new book.
+14. Admin publishes a book.
+15. Admin reviews orders and payment records.
+
+Also test:
+- Invalid login.
+- Unauthorized admin access.
+- Direct PDF URL access without entitlement.
+- Tampered order price.
+- Fake success callback.
+- Duplicate webhook.
+- Invalid webhook signature.
+- Failed payment.
+- Cancelled payment.
+- Expired signed URL.
+
+Never use real money in automated tests. Use provider sandbox environments or controlled test adapters.
+
+---
+
+# PART 18 — DEPLOYMENT AND PRODUCTION READINESS
+
+Prepare the application for real deployment.
+
+Include:
+- Production environment configuration.
+- Database migration instructions.
+- Storage bucket configuration.
+- RLS verification.
+- Cloudflare deployment configuration.
+- Domain and routing configuration.
+- HTTPS requirements.
+- Secure secrets configuration.
+- Backup strategy.
+- Error monitoring.
+- Logging.
+- Health checks.
+- Rollback guidance.
+- Production build verification.
+
+Create clear documentation for:
+- Local development.
+- Environment variables.
+- Database setup.
+- Storage setup.
+- Admin account provisioning.
+- Payment provider configuration.
+- Testing.
+- Deployment.
+
+Never create an insecure default administrator account or hardcoded production password.
+
+---
+
+# PART 19 — IMPLEMENTATION PHASES
+
+Execute the project in these phases, in order.
+
+### PHASE 1 — Architecture and Foundation
+- Project structure.
+- Dependencies.
+- Design system.
+- Routing.
+- Themes.
+- Multilingual foundation.
+- Environment configuration.
+
+### PHASE 2 — Database and Security Foundation
+- Database schema.
+- Migrations.
+- Supabase Auth.
+- User roles.
+- RLS.
+- Storage policies.
+- Secure API foundation.
+
+### PHASE 3 — Public Website
+- Homepage.
+- Catalog.
+- Search.
+- Filters.
+- Categories.
+- Book details.
+- SEO.
+
+### PHASE 4 — Customer Experience
+- Registration.
+- Login.
+- Password reset.
+- Customer dashboard.
+- My Library.
+- Wishlist.
+- Reading history.
+- Notifications.
+- Settings.
+
+### PHASE 5 — PDF Reader
+- PDF.js integration.
+- Reader interface.
+- Bookmarks.
+- Progress.
+- Protected paid-book access.
+
+### PHASE 6 — Commerce
+- Cart.
+- Buy Now.
+- Checkout.
+- Order creation.
+- Payment method selection.
+- Payment architecture.
+- Payment verification.
+- Purchase entitlements.
+
+### PHASE 7 — Admin Dashboard
+- Overview.
+- Books.
+- Categories.
+- Uploads.
+- Pricing.
+- Orders.
+- Customers.
+- Payment settings.
+- Reports.
+- Activity logs.
+
+### PHASE 8 — Final Quality and Production
+- Testing.
+- Security review.
+- Performance.
+- Accessibility.
+- Mobile verification.
+- Deployment preparation.
+- Documentation.
+
+Do not skip phases or silently leave incomplete functionality.
+
+At the end of each phase:
+1. Run relevant tests.
+2. Run lint.
+3. Run the build.
+4. Fix issues caused by the implementation.
+5. Summarize what is complete.
+6. List what remains.
+7. Identify any external credentials or provider information needed.
+
+Continue to the next phase after the previous phase passes its applicable checks. If a critical blocker prevents safe progress, explain it and do not pretend it is resolved.
+
+---
+
+# PART 20 — DEFINITION OF DONE
+
+The project is not complete merely because the homepage looks good.
+
+The final product must satisfy all of the following:
+
+- Public website works.
+- Catalog uses real database records.
+- Search and filters work.
+- Customer registration and login work.
+- Customer account works.
+- Free-book reading works.
+- Paid-book access is protected server-side.
+- PDF reader works.
+- Reading progress and bookmarks persist.
+- Wishlist works.
+- Cart works.
+- Checkout works.
+- Orders persist in the database.
+- Payment status is verified securely.
+- Purchased books unlock only after trusted verification.
+- Admin dashboard works.
+- Admin permissions are enforced server-side.
+- Book and category management work.
+- Pricing is database-backed.
+- Payment settings are securely managed.
+- Reports use real records.
+- Somali, English, and Arabic work.
+- Light and dark themes work.
+- Desktop, tablet, and mobile layouts work.
+- Security and authorization tests pass.
+- Production build succeeds.
+- Deployment documentation is complete.
+
+If real payment credentials, provider documentation, email credentials, or other external services are unavailable, clearly identify them as external dependencies. Never mark those integrations as complete.
+
+---
+
+# FINAL INSTRUCTION
+
+Start by creating a technical implementation plan based on this specification.
+
+Then build the actual website phase by phase.
+
+Make professional engineering decisions independently where details are not specified, but do not invent business rules, payment providers, credentials, or financial behavior.
+
+Prioritize correctness, security, maintainability, user experience, and production readiness over speed.
+
+The final result must be a complete, professional **Khalid Sharif Digital Library**, not a demo.
+
+At completion, provide a detailed handover report containing:
+- Architecture.
+- Implemented features.
+- Database schema.
+- Security controls.
+- Payment integration status.
+- Test results.
+- Deployment instructions.
+- Remaining external dependencies.
+- Known limitations.
+
+**Begin now.**
