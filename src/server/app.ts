@@ -290,6 +290,7 @@ export async function createApp(customContext?: Partial<AppRuntimeContext>): Pro
       service: 'Khalid Sharif Digital Library',
       databaseMode,
       emailConfigured: emailService.isConfigured(),
+      emailVerificationRequired: Boolean(config.requireEmailVerification),
       timestamp: new Date().toISOString(),
     });
   });
