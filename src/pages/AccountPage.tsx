@@ -1,6 +1,6 @@
 import React, { useCallback, useEffect, useState } from 'react';
 import { Link, Navigate, useNavigate, useParams } from 'react-router-dom';
-import { BookOpen, Bell, Check, Download, Heart, History, LogOut, MailCheck, Receipt, Settings, Trash2 } from 'lucide-react';
+import { BookOpen, Bell, Check, Download, Heart, History, LogOut, Receipt, Settings, Trash2 } from 'lucide-react';
 import { apiFetch, downloadAuthenticatedFile, setAuthToken } from '../lib/api';
 import { useApp } from '../contexts/AppContext';
 import { SeoHead } from '../components/SeoHead';
@@ -66,8 +66,6 @@ export const AccountPage: React.FC = () => {
   const [changingPw, setChangingPw] = useState(false);
   const [pwMsg, setPwMsg] = useState<string | null>(null);
   const [pwError, setPwError] = useState<string | null>(null);
-  const [resendingVerify, setResendingVerify] = useState(false);
-  const [verifyMsg, setVerifyMsg] = useState<string | null>(null);
 
   useEffect(() => {
     if (user) {
@@ -163,19 +161,6 @@ export const AccountPage: React.FC = () => {
     void loadAccountData();
   };
 
-  const handleResendVerification = async () => {
-    setResendingVerify(true);
-    setVerifyMsg(null);
-    try {
-      await apiFetch('/api/auth/resend-verification', { method: 'POST' });
-      setVerifyMsg(t('verificationSentMsg'));
-    } catch (err) {
-      setVerifyMsg(err instanceof Error ? err.message : t('errorLoading'));
-    } finally {
-      setResendingVerify(false);
-    }
-  };
-
   const handleLogout = async () => {
     await logout();
     navigate('/');
@@ -202,19 +187,7 @@ export const AccountPage: React.FC = () => {
             <h1 className="font-display text-xl sm:text-3xl font-semibold text-slate-900 dark:text-stone-50 break-words">
               {user.fullName || user.email}
             </h1>
-            <div className="flex flex-wrap items-center gap-2 mt-0.5">
-              <p className="text-xs sm:text-sm text-slate-500 dark:text-slate-400 break-all">{user.email}</p>
-              <span
-                className={`inline-flex items-center gap-1 px-2 py-0.5 rounded text-[11px] font-medium ${
-                  user.emailVerified
-                    ? 'bg-emerald-50 text-emerald-700 border border-emerald-200 dark:bg-emerald-950/40 dark:text-emerald-300 dark:border-emerald-800'
-                    : 'bg-amber-50 text-amber-800 border border-amber-200 dark:bg-amber-950/40 dark:text-amber-300 dark:border-amber-800'
-                }`}
-              >
-                <MailCheck className="w-3 h-3" />
-                {user.emailVerified ? t('emailVerifiedBadge') : t('emailUnverifiedBadge')}
-              </span>
-            </div>
+            <p className="mt-0.5 text-xs sm:text-sm text-slate-500 dark:text-slate-400 break-all">{user.email}</p>
           </div>
           <div className="flex flex-wrap items-center gap-2.5">
             {isAdmin && (
@@ -235,23 +208,6 @@ export const AccountPage: React.FC = () => {
             </button>
           </div>
         </div>
-
-        {!user.emailVerified && (
-          <div className="mb-5 p-3.5 sm:p-4 rounded-lg bg-amber-50/90 dark:bg-amber-950/30 border border-amber-300/80 dark:border-amber-800 flex flex-wrap items-center justify-between gap-3 text-xs sm:text-sm text-amber-900 dark:text-amber-200">
-            <div className="space-y-1">
-              <p className="font-medium">{t('verifyEmailBanner')}</p>
-              {verifyMsg && <p className="text-xs text-emerald-700 dark:text-emerald-400">{verifyMsg}</p>}
-            </div>
-            <button
-              type="button"
-              disabled={resendingVerify}
-              onClick={() => void handleResendVerification()}
-              className="min-h-[36px] px-3.5 py-1.5 text-xs font-semibold rounded bg-[#0376B8] hover:bg-[#025E94] text-white disabled:opacity-50 shrink-0"
-            >
-              {resendingVerify ? t('loading') : t('resendVerificationBtn')}
-            </button>
-          </div>
-        )}
 
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-5 lg:gap-8">
           {/* Sidebar Navigation (Horizontally scrollable on mobile) */}

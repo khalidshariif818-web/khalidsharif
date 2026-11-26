@@ -359,7 +359,7 @@ export const CheckoutPage: React.FC = () => {
       navigate(`/checkout/result?order=${encodeURIComponent(res.order.orderReference)}`);
     } catch (err) {
       if (err instanceof ApiError && err.details?.code === 'EMAIL_VERIFICATION_REQUIRED') {
-        setError(`${err.message} (${t('resendVerificationBtn')} -> /account/settings)`);
+        setError(err.message);
       } else if (err instanceof ApiError && err.status === 401) {
         const returnTo = directBookId ? `/checkout?bookId=${encodeURIComponent(directBookId)}` : '/checkout';
         navigate(`/login?next=${encodeURIComponent(returnTo)}`, { replace: true });
