@@ -44,16 +44,12 @@ export function loadServerConfig(envOverride?: Record<string, string | undefined
   const nodeEnv = readEnv('NODE_ENV') || 'development';
   const resendApiKey = readEnv('RESEND_API_KEY')?.trim() || '';
   const reqEmailRaw = readEnv('REQUIRE_EMAIL_VERIFICATION')?.trim().toLowerCase();
-  // Production accounts must verify email before receiving a session.
-  // Keep the override available for development environments only.
   const requireEmailVerification =
-    nodeEnv === 'production'
+    reqEmailRaw === 'true'
       ? true
-      : reqEmailRaw === 'true'
-        ? true
-        : reqEmailRaw === 'false'
-          ? false
-          : Boolean(resendApiKey);
+      : reqEmailRaw === 'false'
+        ? false
+        : nodeEnv === 'production' || Boolean(resendApiKey);
 
   return {
     appUrl: readEnv('APP_URL') || 'http://localhost:3000',
